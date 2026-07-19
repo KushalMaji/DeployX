@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/api";
 import type { Project } from "../types/Project";
 import ProjectForm from "../components/ProjectForm";
+import ProjectCard from "../components/ProjectCard";
 
 function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -36,6 +37,15 @@ function Dashboard() {
     fetchProjects();
   }, []);
 
+  const deleteProject = async (id: number) => {
+  try {
+    await api.delete(`/projects/${id}`);
+    fetchProjects();
+  } catch (error) {
+    console.error("Error deleting project:", error);
+  }
+  };
+
   return (
     <div>
       <h1>🚀 DeployX Dashboard</h1>
@@ -50,27 +60,12 @@ function Dashboard() {
         <p>No projects found.</p>
       ) : (
         projects.map((project) => (
-          <div
-            key={project.id}
-            style={{
-              backgroundColor: "white",
-              padding: "15px",
-              marginBottom: "15px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h3>{project.name}</h3>
-
-            <p>
-              <strong>Repository:</strong> {project.githubRepo}
-            </p>
-
-            <p>
-              <strong>Status:</strong> {project.status}
-            </p>
-          </div>
-        ))
+    <ProjectCard
+      key={project.id}
+      project={project}
+      onDelete={deleteProject}
+    />
+      ))
       )}
     </div>
   );
