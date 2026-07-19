@@ -44,7 +44,9 @@ function ProjectForm({ onAddProject }: ProjectFormProps) {
         />
       </div>
 
-      <button type="submit">Add Project</button>
+      <button className="add-btn" type="submit">
+        Add Project
+      </button>
     </form>
   );
 }
