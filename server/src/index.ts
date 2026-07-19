@@ -1,12 +1,18 @@
 import express from "express";
 import projectRoutes from "./routes/projectRoutes";
 import statusRoutes from "./routes/statusRoutes";
+import cors from "cors";
 
 const app = express();
 const PORT = 5000;
 
 // Middleware
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 
 // Home Route
 app.get("/", (req, res) => {
