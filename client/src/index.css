@@ -77,3 +77,19 @@ form {
   color: royalblue;
   margin-top: 10px;
 }
+
+.card {
+  transition: all .2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+button {
+  transition: .2s;
+}
+
+button:hover {
+  opacity: .9;
+}

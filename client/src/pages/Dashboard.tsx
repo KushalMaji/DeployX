@@ -7,6 +7,8 @@ import StatsCard from "../components/StatsCard";
 
 function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [search, setSearch] = useState("");
 
   // Fetch all projects
   const fetchProjects = async () => {
@@ -32,18 +34,46 @@ function Dashboard() {
     }
   };
 
-  // Delete a project
+  // Update project
+  const updateProject = async (
+    id: number,
+    name: string,
+    githubRepo: string
+  ) => {
+    try {
+      await api.put(`/projects/${id}`, {
+        name,
+        githubRepo,
+      });
+
+      fetchProjects();
+      setEditingProject(null);
+    } catch (error) {
+      console.error("Error updating project:", error);
+    }
+  };
+
+  // Delete project
   const deleteProject = async (id: number) => {
     try {
       await api.delete(`/projects/${id}`);
 
       fetchProjects();
+
+      if (editingProject?.id === id) {
+        setEditingProject(null);
+      }
     } catch (error) {
       console.error("Error deleting project:", error);
     }
   };
 
-  // Load projects when page opens
+  // Filter projects
+  const filteredProjects = projects.filter((project) =>
+    project.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Load projects
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -51,32 +81,55 @@ function Dashboard() {
   return (
     <div className="container">
       <h1>🚀 DeployX Dashboard</h1>
+
+      {/* Statistics */}
       <div className="stats-container">
-      <StatsCard
-        title="Total Projects"
-        value={projects.length}
+        <StatsCard
+          title="Total Projects"
+          value={projects.length}
+        />
+
+        <StatsCard
+          title="Active Projects"
+          value={
+            projects.filter(
+              (project) => project.status === "Active"
+            ).length
+          }
+        />
+      </div>
+
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="🔍 Search Projects..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
       />
 
-      <StatsCard
-        title="Active Projects"
-        value={projects.filter((p) => p.status === "Active").length}
+      <br />
+      <br />
+
+      {/* Add / Edit Form */}
+      <ProjectForm
+        onAddProject={addProject}
+        onUpdateProject={updateProject}
+        editingProject={editingProject}
       />
-    </div>
-    
-      <ProjectForm onAddProject={addProject} />
 
       <h2 style={{ marginBottom: "20px" }}>
-        Projects ({projects.length})
+        Projects ({filteredProjects.length})
       </h2>
 
-      {projects.length === 0 ? (
+      {filteredProjects.length === 0 ? (
         <p>No projects found.</p>
       ) : (
-        projects.map((project) => (
+        filteredProjects.map((project) => (
           <ProjectCard
             key={project.id}
             project={project}
             onDelete={deleteProject}
+            onEdit={setEditingProject}
           />
         ))
       )}

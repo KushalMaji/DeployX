@@ -1,12 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Project } from "../types/Project";
 
 interface ProjectFormProps {
   onAddProject: (name: string, githubRepo: string) => void;
+  onUpdateProject: (
+    id: number,
+    name: string,
+    githubRepo: string
+  ) => void;
+  editingProject: Project | null;
 }
 
-function ProjectForm({ onAddProject }: ProjectFormProps) {
+function ProjectForm({
+  onAddProject,
+  onUpdateProject,
+  editingProject,
+}: ProjectFormProps) {
   const [name, setName] = useState("");
   const [githubRepo, setGithubRepo] = useState("");
+
+  useEffect(() => {
+    if (editingProject) {
+      setName(editingProject.name);
+      setGithubRepo(editingProject.githubRepo);
+    } else {
+      setName("");
+      setGithubRepo("");
+    }
+  }, [editingProject]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,37 +37,62 @@ function ProjectForm({ onAddProject }: ProjectFormProps) {
       return;
     }
 
-    onAddProject(name, githubRepo);
+    if (editingProject) {
+      onUpdateProject(editingProject.id, name, githubRepo);
+    } else {
+      onAddProject(name, githubRepo);
+    }
 
     setName("");
     setGithubRepo("");
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Project</h2>
+    <form onSubmit={handleSubmit} className="card">
+      <h2>
+        {editingProject ? "✏️ Edit Project" : "➕ Add New Project"}
+      </h2>
 
-      <div style={{ marginBottom: "10px" }}>
-        <input
-          type="text"
-          placeholder="Project Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      <input
+        type="text"
+        placeholder="Project Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <br />
+      <br />
+
+      <input
+        type="text"
+        placeholder="GitHub Repository"
+        value={githubRepo}
+        onChange={(e) => setGithubRepo(e.target.value)}
+      />
+
+      <br />
+      <br />
+
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+        }}
+      >
+        <button className="add-btn" type="submit">
+          {editingProject ? "Update Project" : "Add Project"}
+        </button>
+
+        {editingProject && (
+          <button
+            type="button"
+            className="delete-btn"
+            onClick={() => window.location.reload()}
+          >
+            Cancel
+          </button>
+        )}
       </div>
-
-      <div style={{ marginBottom: "10px" }}>
-        <input
-          type="text"
-          placeholder="GitHub Repository"
-          value={githubRepo}
-          onChange={(e) => setGithubRepo(e.target.value)}
-        />
-      </div>
-
-      <button className="add-btn" type="submit">
-        Add Project
-      </button>
     </form>
   );
 }
